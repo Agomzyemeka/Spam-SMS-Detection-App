@@ -31,8 +31,8 @@ else:
 
 
 # Load the saved model and vectorizer
-model_path = 'spam_classifier.pkl'
-vectorizer_path = 'tfidf_vectorizer.pkl'
+model_path = 'best_spam_model_Support Vector Machine.pkl'
+vectorizer_path = 'vectorizer.pkl'
 
 if os.path.exists(model_path) and os.path.exists(vectorizer_path):
     model = joblib.load(model_path)

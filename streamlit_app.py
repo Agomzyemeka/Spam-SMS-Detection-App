@@ -21,15 +21,48 @@ if os.path.exists(model_path) and os.path.exists(vectorizer_path):
 else:
     st.error("Model or vectorizer not found. Please train and save the model first.")
 
-# Add custom CSS for icons and styling
+# Custom CSS to adjust the width of the main container
+st.markdown(
+    """
+    <style>
+    @media (min-width: 768px) {
+        .main .block-container {
+            max-width: 95%;
+            padding-left: 5%;
+            padding-right: 5%;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Custom CSS for styling
 st.markdown("""
 <style>
 .navbar {
+    background-color: #f8f9fa;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between; /* Distribute space between items */
+    align-items: center;
     margin-bottom: 20px;
 }
 
 .nav-link {
     font-size: 18px;
+    text-decoration: none;
+    color: #000;
+    padding: 14px 16px;
+    display: block;
+    flex-grow: 1; /* Allow links to grow and take available space */
+    text-align: center; /* Center-align text within each link */
+}
+            
+
+.nav-link:hover {
+    background-color: #495057; /* Darker background on hover */
+    color: #ffffff; 
 }
 
 footer {
@@ -59,17 +92,107 @@ section-divider {
 
 # Add Font Awesome icons to the header
 st.markdown("""
-<nav style="background-color: #f8f9fa; padding: 10px;">
-    <ul style="list-style-type: none; margin: 0; padding: 0; overflow: hidden;">
-        <li style="float: left;"><a href="#single-message-prediction" style="text-decoration: none; color: #000; padding: 14px 16px; display: block;"><i class="fas fa-envelope-open-text"></i> Single Message Prediction</a></li>
-        <li style="float: left;"><a href="#batch-prediction" style="text-decoration: none; color: #000; padding: 14px 16px; display: block;"><i class="fas fa-file-upload"></i> Batch Prediction</a></li>
-        <li style="float: left;"><a href="#email-fetch" style="text-decoration: none; color: #000; padding: 14px 16px; display: block;"><i class="fas fa-mail-bulk"></i> Email Fetch</a></li>
-    </ul>
+<nav class="navbar">
+    <a class="nav-link" href="#single-message-prediction"><i class="fas fa-envelope-open-text"></i> Single Message Prediction</a>
+    <a class="nav-link" href="#batch-prediction"><i class="fas fa-file-upload"></i> Batch Prediction</a>
+    <a class="nav-link" href="#email-fetch"><i class="fas fa-mail-bulk"></i> Email Fetch</a>
 </nav>
 """, unsafe_allow_html=True)
 
+# Custom CSS to style the title with a dark gradient background, texture, and tooltip
+st.markdown(
+    """
+    <style>
+    .title-container {
+        display: flex;
+        justify-content: center;
+        width: 100%; /* Make container stretch to full width */
+        margin: 0; /* Remove default margins */
+        padding: 0; /* Remove default padding */
+        position: relative;
+    }
+
+    .title {
+        font-family: 'Roboto', sans-serif;
+        font-size: 3em;
+        font-weight: bold;
+        color: #ffffff;
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        border-radius: 0px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: relative;
+        width: 100%; /* Make title stretch */
+        margin: 0 auto; /* Center the title within the container */
+    }
+
+    .title::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://www.transparenttextures.com/patterns/asfalt-light.png');
+        opacity: 0.6;  /* Adjust opacity to make the pattern more or less visible */
+    }
+
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        width: 100%; /* Make title stretch */
+    }
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #ffffff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%; /* Position the tooltip above the text */
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip .tooltiptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .stApp {
+        background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+        color: white;
+    }
+    </style>
+    <div class="tooltip title-container">
+        <div class="title">Spam SMS Detection App</div>
+        <div class="tooltiptext">Please do not forget to leave the GitHub repo a star ⭐</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
 # Streamlit UI
-st.title('Spam SMS Detection App')
+#st.title('Spam SMS Detection App')
 
 # Initialize session state for email data
 if 'email_data' not in st.session_state:

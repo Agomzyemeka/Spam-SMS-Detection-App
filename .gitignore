@@ -4,3 +4,5 @@ credentials.json
 token.json
 backupScript.py
 backupscript2-email-fetch-csv-download.py
+backup-recent.py
+.env

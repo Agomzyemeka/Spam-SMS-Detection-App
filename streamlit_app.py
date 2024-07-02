@@ -18,9 +18,17 @@ load_dotenv()
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 #print(f"PAYSTACK_SECRET_KEY: {PAYSTACK_SECRET_KEY}")
-
 # Use PAYSTACK_SECRET_KEY in your application logic
 # Example: Make an API call using the secret key
+
+# Access the environment variables
+client_id = os.getenv("CLIENT_ID")
+project_id = os.getenv("PROJECT_ID")
+auth_uri = os.getenv("AUTH_URI")
+token_uri = os.getenv("TOKEN_URI")
+auth_provider_x509_cert_url = os.getenv("AUTH_PROVIDER_X509_CERT_URL")
+client_secret = os.getenv("CLIENT_SECRET")
+redirect_uris = [os.getenv(f"REDIRECT_URI{i}") for i in range(1, 8) if os.getenv(f"REDIRECT_URI{i}")]
 
 
 # OAuth 2.0 client credentials
@@ -345,8 +353,21 @@ def page1():
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
-                creds = flow.run_local_server(port=0)
+                flow = InstalledAppFlow.from_client_config(
+                    {
+                        "web": {
+                            "client_id": client_id,
+                            "project_id": "forward-adviser-424413-h6",
+                            "auth_uri": auth_uri,
+                            "token_uri": token_uri,
+                            "auth_provider_x509_cert_url": auth_provider_x509_cert_url,
+                            "client_secret": client_secret,
+                            "redirect_uris": redirect_uris
+                        }
+                    },
+                    scopes=SCOPES
+                )
+                creds = flow.run_local_server(port=8501)
             with open('token.json', 'w') as token:
                 token.write(creds.to_json())
         return creds

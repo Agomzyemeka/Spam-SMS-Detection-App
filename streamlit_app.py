@@ -21,10 +21,17 @@ load_dotenv()
 
 # Initialize Google Cloud Storage client using credentials from Streamlit secrets
 service_account_info = json.loads(json.dumps(dict(st.secrets["gcp_service_account"])))
-credentials = ServiceAccountCredentials.from_service_account_info(service_account_info)
-storage_client = storage.Client(credentials=credentials)
-#bucket_name = st.secrets["GCP_BUCKET_NAME"]
-bucket_name = os.getenv("GCS_BUCKET_NAME")
+# Debug: Print the service_account_info to ensure it is correctly parsed
+st.write("Service Account Info:", service_account_info)
+
+try:
+    credentials = ServiceAccountCredentials.from_service_account_info(service_account_info)
+    storage_client = storage.Client(credentials=credentials)
+except google.auth.exceptions.GoogleAuthError as e:
+    st.error(f"Error initializing Google Cloud Storage client: {e}")
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
+# Debug: Print the bucket name to ensure it is correctly loaded
+st.write("GCS_BUCKET_NAME:", GCS_BUCKET_NAME)
 
 # Paystack API keys from .env file
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
@@ -353,17 +360,29 @@ def page1():
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-    def save_token(token, user_id):
-        bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(f'tokens/{user_id}.json')
-        blob.upload_from_string(json.dumps(token), content_type='application/json')
+    # Function to save token for a specific user
+    def save_token(user_id, token_info):
+        try:
+            bucket = storage_client.bucket(GCS_BUCKET_NAME)
+            blob = bucket.blob(f'tokens/{user_id}.json')
+            blob.upload_from_string(json.dumps(token_info))
+            st.success(f"Token for user {user_id} saved successfully.")
+        except Exception as e:
+            st.error(f"Error saving token for user {user_id}: {e}")
     
+    # Function to load token for a specific user
     def load_token(user_id):
-        bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(f'tokens/{user_id}.json')
-        if blob.exists():
-            return json.loads(blob.download_as_string())
-        return None
+        try:
+            bucket = storage_client.bucket(GCS_BUCKET_NAME)
+            blob = bucket.blob(f'tokens/{user_id}.json')
+            if blob.exists():
+                return json.loads(blob.download_as_string())
+            else:
+                st.warning(f"Token for user {user_id} not found.")
+                return None
+        except Exception as e:
+            st.error(f"Error loading token for user {user_id}: {e}")
+            return None
     
     # Function to authenticate and get Gmail service
     def authenticate():

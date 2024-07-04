@@ -46,7 +46,7 @@ st.write("PAYSTACK_PUBLIC_KEY:", PAYSTACK_PUBLIC_KEY)
 # Access the environment variables
 client_id = os.getenv("CLIENT_ID")
 project_id = os.getenv("PROJECT_ID")
-st.write("PROJECT_ID:", st.secrets["client_secrets"]["json"]["project_id"])
+#st.write("PROJECT_ID:", st.secrets["client_secrets"]["json"]["project_id"])
 auth_uri = os.getenv("AUTH_URI")
 token_uri = os.getenv("TOKEN_URI")
 auth_provider_x509_cert_url = os.getenv("AUTH_PROVIDER_X509_CERT_URL")

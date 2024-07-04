@@ -410,7 +410,7 @@ def page1():
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+                flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
                 auth_url, _ = flow.authorization_url(prompt='consent')
     
                 # Inject JavaScript to open the authorization URL automatically

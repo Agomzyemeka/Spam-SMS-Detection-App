@@ -2,6 +2,10 @@ import os
 import streamlit as st
 import pandas as pd
 import joblib
+import uuid
+import json
+import google.auth.exceptions
+from google.cloud import storage
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -13,6 +17,12 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+# Initialize Google Cloud Storage client using credentials from Streamlit secrets
+service_account_info = json.loads(st.secrets["gcs_service_account"])
+credentials = Credentials.from_service_account_info(service_account_info)
+storage_client = storage.Client(credentials=credentials)
+bucket_name = st.secrets["GCS_BUCKET_NAME"]
 
 # Paystack API keys from .env file
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
@@ -341,14 +351,35 @@ def page1():
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
+    def save_token(token, user_id):
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(f'tokens/{user_id}.json')
+        blob.upload_from_string(json.dumps(token), content_type='application/json')
+    
+    def load_token(user_id):
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(f'tokens/{user_id}.json')
+        if blob.exists():
+            return json.loads(blob.download_as_string())
+        return None
+    
     # Function to authenticate and get Gmail service
     def authenticate():
         SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
         creds = None
-
-        # Check if token.json exists and load it, else authenticate with the client secrets file
-        if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    
+        # Get user ID from cookies or create a new one
+        if 'user_id' in st.session_state:
+            user_id = st.session_state['user_id']
+        else:
+            user_id = str(uuid.uuid4())
+            st.session_state['user_id'] = user_id
+    
+        # Check if the token file for the current user exists and load it
+        token_info = load_token(user_id)
+        if token_info:
+            creds = Credentials.from_authorized_user_info(token_info, SCOPES)
+    
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
@@ -356,20 +387,48 @@ def page1():
                 flow = InstalledAppFlow.from_client_config(
                     {
                         "web": {
-                            "client_id": client_id,
-                            "project_id": "forward-adviser-424413-h6",
-                            "auth_uri": auth_uri,
-                            "token_uri": token_uri,
-                            "auth_provider_x509_cert_url": auth_provider_x509_cert_url,
-                            "client_secret": client_secret,
-                            "redirect_uris": redirect_uris
+                            "client_id": st.secrets["CLIENT_ID"],
+                            "project_id": st.secrets["PROJECT_ID"],
+                            "auth_uri": st.secrets["AUTH_URI"],
+                            "token_uri": st.secrets["TOKEN_URI"],
+                            "auth_provider_x509_cert_url": st.secrets["AUTH_PROVIDER_X509_CERT_URL"],
+                            "client_secret": st.secrets["CLIENT_SECRET"],
+                            "redirect_uris": [
+                                st.secrets["REDIRECT_URI1"],
+                                st.secrets["REDIRECT_URI2"],
+                                st.secrets["REDIRECT_URI3"],
+                                st.secrets["REDIRECT_URI4"],
+                                st.secrets["REDIRECT_URI5"],
+                                st.secrets["REDIRECT_URI6"],
+                                st.secrets["REDIRECT_URI7"],
+                                st.secrets["REDIRECT_URI8"]
+                            ]
                         }
                     },
                     scopes=SCOPES
                 )
-                creds = flow.run_local_server(port=8502)
-            with open('token.json', 'w') as token:
-                token.write(creds.to_json())
+                auth_url, _ = flow.authorization_url(prompt='consent')
+    
+                # Inject JavaScript to open the authorization URL automatically
+                components.html(f"""
+                    <script>
+                        window.location.href = "{auth_url}";
+                    </script>
+                """, height=0)
+    
+                st.write("Please authorize the application in the newly opened tab.")
+    
+                # Capture the authorization response URL automatically
+                auth_response_url = st.experimental_get_query_params().get('code')
+    
+                if auth_response_url:
+                    try:
+                        flow.fetch_token(code=auth_response_url)
+                        creds = flow.credentials
+                        save_token(json.loads(creds.to_json()), user_id)
+                    except google.auth.exceptions.GoogleAuthError as e:
+                        st.error(f"Error during authentication: {e}")
+    
         return creds
 
     # Paystack Payment Integration

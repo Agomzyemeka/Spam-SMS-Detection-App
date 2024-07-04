@@ -55,7 +55,7 @@ redirect_uris = [os.getenv(f"REDIRECT_URI{i}") for i in range(1, 9) if os.getenv
 
 
 # OAuth 2.0 client credentials
-CLIENT_SECRETS_FILE = st.secrets["client_secrets"]
+CLIENT_SECRETS_FILE = st.secrets["client_secrets"]["json"]
 st.write("CLIENT_SECRETS_FILE:", CLIENT_SECRETS_FILE)
 
 # Load the saved model and vectorizer

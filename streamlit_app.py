@@ -48,7 +48,7 @@ auth_uri = os.getenv("AUTH_URI")
 token_uri = os.getenv("TOKEN_URI")
 auth_provider_x509_cert_url = os.getenv("AUTH_PROVIDER_X509_CERT_URL")
 client_secret = os.getenv("CLIENT_SECRET")
-redirect_uris = [os.getenv(f"REDIRECT_URI{i}") for i in range(1, 8) if os.getenv(f"REDIRECT_URI{i}")]
+redirect_uris = [os.getenv(f"REDIRECT_URI{i}") for i in range(1, 9) if os.getenv(f"REDIRECT_URI{i}")]
 
 
 # OAuth 2.0 client credentials
@@ -409,22 +409,13 @@ def page1():
                 flow = InstalledAppFlow.from_client_config(
                     {
                         "web": {
-                            "client_id": st.secrets["CLIENT_ID"],
-                            "project_id": st.secrets["PROJECT_ID"],
-                            "auth_uri": st.secrets["AUTH_URI"],
-                            "token_uri": st.secrets["TOKEN_URI"],
-                            "auth_provider_x509_cert_url": st.secrets["AUTH_PROVIDER_X509_CERT_URL"],
-                            "client_secret": st.secrets["CLIENT_SECRET"],
-                            "redirect_uris": [
-                                st.secrets["REDIRECT_URI1"],
-                                st.secrets["REDIRECT_URI2"],
-                                st.secrets["REDIRECT_URI3"],
-                                st.secrets["REDIRECT_URI4"],
-                                st.secrets["REDIRECT_URI5"],
-                                st.secrets["REDIRECT_URI6"],
-                                st.secrets["REDIRECT_URI7"],
-                                st.secrets["REDIRECT_URI8"]
-                            ]
+                            "client_id": client_id,
+                            "project_id": project_id,
+                            "auth_uri": auth_uri,
+                            "token_uri": token_uri,
+                            "auth_provider_x509_cert_url": auth_provider_x509_cert_url,
+                            "client_secret": client_secret,
+                            "redirect_uris": redirect_uris
                         }
                     },
                     scopes=SCOPES

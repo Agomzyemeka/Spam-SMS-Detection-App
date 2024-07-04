@@ -416,6 +416,7 @@ def page1():
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
+                st.write("flow:", flow)
                 auth_url, _ = flow.authorization_url(prompt='consent')
     
                 # Inject JavaScript to open the authorization URL automatically

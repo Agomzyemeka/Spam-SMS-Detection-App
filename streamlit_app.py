@@ -11,6 +11,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 import streamlit.components.v1 as components
 import requests
 from dotenv import load_dotenv
@@ -20,7 +21,7 @@ load_dotenv()
 
 # Initialize Google Cloud Storage client using credentials from Streamlit secrets
 service_account_info = json.loads(json.dumps(dict(st.secrets["gcp_service_account"])))
-credentials = Credentials.from_service_account_info(service_account_info)
+credentials = ServiceAccountCredentials.from_service_account_info(service_account_info)
 storage_client = storage.Client(credentials=credentials)
 bucket_name = st.secrets["GCS_BUCKET_NAME"]
 
@@ -378,7 +379,7 @@ def page1():
         # Check if the token file for the current user exists and load it
         token_info = load_token(user_id)
         if token_info:
-            creds = Credentials.from_authorized_user_info(token_info, SCOPES)
+            creds = ServiceAccountCredentials.from_authorized_user_info(token_info, SCOPES)
     
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:

@@ -440,7 +440,7 @@ def page1():
                 st.write("Please authorize the application in the newly opened tab.")
     
                 # Capture the authorization response URL automatically
-                auth_response_url = st.experimental_get_query_params().get('code')
+                auth_response_url = st.query_params().get('code')
     
                 if auth_response_url:
                     try:

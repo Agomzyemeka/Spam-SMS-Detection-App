@@ -21,7 +21,7 @@ load_dotenv()
 
 # Initialize Google Cloud Storage client using credentials from Streamlit secrets
 #service_account_info = json.loads(json.dumps(dict(st.secrets["gcp_service_account"])))
-st.write("Service Account Info:", st.secrets["gcp_service_account"])
+st.write("service_account_info:", st.secrets["gcp_service_account"])
 # Debug: Print the service_account_info to ensure it is correctly parsed
 #st.write("Service Account Info:", service_account_info)
 
@@ -54,7 +54,8 @@ redirect_uris = [os.getenv(f"REDIRECT_URI{i}") for i in range(1, 9) if os.getenv
 
 
 # OAuth 2.0 client credentials
-CLIENT_SECRETS_FILE = "credentials.json"
+CLIENT_SECRETS_FILE = st.secrets["gcp_service_account"]
+st.write("CLIENT_SECRETS_FILE:", CLIENT_SECRETS_FILE)
 
 # Load the saved model and vectorizer
 model_path = 'best_spam_model_Support Vector Machine.pkl'

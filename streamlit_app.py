@@ -5,6 +5,7 @@ import joblib
 import uuid
 import json
 import google.auth.exceptions
+from google.oauth2 import service_account
 from google.cloud import storage
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow

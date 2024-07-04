@@ -369,75 +369,75 @@ def page1():
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
-        # Function to save token for a specific user
-        def save_token(user_id, token_info):
-            try:
-                bucket = storage_client.bucket(GCS_BUCKET_NAME)
-                blob = bucket.blob(f'tokens/{user_id}.json')
-                blob.upload_from_string(json.dumps(token_info))
-                st.success(f"Token for user {user_id} saved successfully.")
-            except Exception as e:
-                st.error(f"Error saving token for user {user_id}: {e}")
-        
-        # Function to load token for a specific user
-        def load_token(user_id):
-            try:
-                bucket = storage_client.bucket(GCS_BUCKET_NAME)
-                blob = bucket.blob(f'tokens/{user_id}.json')
-                if blob.exists():
-                    return json.loads(blob.download_as_string())
-                else:
-                    st.warning(f"Token for user {user_id} not found.")
-                    return None
-            except Exception as e:
-                st.error(f"Error loading token for user {user_id}: {e}")
-                return None
-        
-        # Function to authenticate and get Gmail service
-        def authenticate():
-            SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-            creds = None
-        
-            # Get user ID from cookies or create a new one
-            if 'user_id' in st.session_state:
-                user_id = st.session_state['user_id']
+    # Function to save token for a specific user
+    def save_token(user_id, token_info):
+        try:
+            bucket = storage_client.bucket(GCS_BUCKET_NAME)
+            blob = bucket.blob(f'tokens/{user_id}.json')
+            blob.upload_from_string(json.dumps(token_info))
+            st.success(f"Token for user {user_id} saved successfully.")
+        except Exception as e:
+            st.error(f"Error saving token for user {user_id}: {e}")
+    
+    # Function to load token for a specific user
+    def load_token(user_id):
+        try:
+            bucket = storage_client.bucket(GCS_BUCKET_NAME)
+            blob = bucket.blob(f'tokens/{user_id}.json')
+            if blob.exists():
+                return json.loads(blob.download_as_string())
             else:
-                user_id = str(uuid.uuid4())
-                st.session_state['user_id'] = user_id
-        
-            # Check if the token file for the current user exists and load it
-            token_info = load_token(user_id)
-            if token_info:
-                creds = ServiceAccountCredentials.from_authorized_user_info(token_info, SCOPES)
-        
-            if not creds or not creds.valid:
-                if creds and creds.expired and creds.refresh_token:
-                    creds.refresh(Request())
-                else:
-                    flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
-                    auth_url, _ = flow.authorization_url(prompt='consent')
-        
-                    # Inject JavaScript to open the authorization URL automatically
-                    components.html(f"""
-                        <script>
-                            window.location.href = "{auth_url}";
-                        </script>
-                    """, height=0)
-        
-                    st.write("Please authorize the application in the newly opened tab.")
-        
-                    # Capture the authorization response URL automatically
-                    auth_response_url = st.experimental_get_query_params().get('code')
-        
-                    if auth_response_url:
-                        try:
-                            flow.fetch_token(code=auth_response_url)
-                            creds = flow.credentials
-                            save_token(json.loads(creds.to_json()), user_id)
-                        except google.auth.exceptions.GoogleAuthError as e:
-                            st.error(f"Error during authentication: {e}")
-        
-            return creds
+                st.warning(f"Token for user {user_id} not found.")
+                return None
+        except Exception as e:
+            st.error(f"Error loading token for user {user_id}: {e}")
+            return None
+    
+    # Function to authenticate and get Gmail service
+    def authenticate():
+        SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+        creds = None
+    
+        # Get user ID from cookies or create a new one
+        if 'user_id' in st.session_state:
+            user_id = st.session_state['user_id']
+        else:
+            user_id = str(uuid.uuid4())
+            st.session_state['user_id'] = user_id
+    
+        # Check if the token file for the current user exists and load it
+        token_info = load_token(user_id)
+        if token_info:
+            creds = ServiceAccountCredentials.from_authorized_user_info(token_info, SCOPES)
+    
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
+                auth_url, _ = flow.authorization_url(prompt='consent')
+    
+                # Inject JavaScript to open the authorization URL automatically
+                components.html(f"""
+                    <script>
+                        window.location.href = "{auth_url}";
+                    </script>
+                """, height=0)
+    
+                st.write("Please authorize the application in the newly opened tab.")
+    
+                # Capture the authorization response URL automatically
+                auth_response_url = st.experimental_get_query_params().get('code')
+    
+                if auth_response_url:
+                    try:
+                        flow.fetch_token(code=auth_response_url)
+                        creds = flow.credentials
+                        save_token(json.loads(creds.to_json()), user_id)
+                    except google.auth.exceptions.GoogleAuthError as e:
+                        st.error(f"Error during authentication: {e}")
+    
+        return creds
 
     # Paystack Payment Integration
     def initialize_paystack_payment(email, amount, currency):

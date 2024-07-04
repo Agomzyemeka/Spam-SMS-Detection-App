@@ -36,6 +36,7 @@ st.write("GCS_BUCKET_NAME:", GCS_BUCKET_NAME)
 # Paystack API keys from .env file
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
+st.write("PAYSTACK_PUBLIC_KEY:", PAYSTACK_PUBLIC_KEY)
 #print(f"PAYSTACK_SECRET_KEY: {PAYSTACK_SECRET_KEY}")
 # Use PAYSTACK_SECRET_KEY in your application logic
 # Example: Make an API call using the secret key
@@ -440,7 +441,7 @@ def page1():
                 st.write("Please authorize the application in the newly opened tab.")
     
                 # Capture the authorization response URL automatically
-                auth_response_url = st.query_params().get('code')
+                auth_response_url = st.experimental_get_query_params().get('code')
     
                 if auth_response_url:
                     try:

@@ -29,6 +29,7 @@ st.write("service_account_info:", st.secrets["gcp_service_account"]["json"])
 
 try:
     credentials = service_account.Credentials.from_service_account_info(service_account_info)
+    st.write("credentials:", credentials)
     storage_client = storage.Client(credentials=credentials)
     st.success("Google Cloud Storage client initialized successfully.")
 except google.auth.exceptions.GoogleAuthError as e:

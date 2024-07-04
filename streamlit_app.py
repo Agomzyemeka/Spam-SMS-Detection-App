@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize Google Cloud Storage client using credentials from Streamlit secrets
-service_account_info = json.loads(json.dumps(st.secrets["gcp_service_account"]))
+service_account_info = json.loads(json.dumps(dict(st.secrets["gcp_service_account"])))
 credentials = Credentials.from_service_account_info(service_account_info)
 storage_client = storage.Client(credentials=credentials)
 bucket_name = st.secrets["GCS_BUCKET_NAME"]

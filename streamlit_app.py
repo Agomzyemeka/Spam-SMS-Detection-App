@@ -55,8 +55,11 @@ redirect_uris = [os.getenv(f"REDIRECT_URI{i}") for i in range(1, 9) if os.getenv
 
 
 # OAuth 2.0 client credentials
-CLIENT_SECRETS_FILE = st.secrets["client_secrets"]["json"]
-st.write("CLIENT_SECRETS_FILE:", CLIENT_SECRETS_FILE)
+# Load client secrets JSON from secrets.toml
+client_secrets_json = st.secrets["client_secrets"]["json"]
+st.write("CLIENT_SECRETS_FILE:", client_secrets_json)
+# Parse JSON string into a Python dictionary
+CLIENT_SECRETS_FILE = json.loads(client_secrets_json)
 
 # Load the saved model and vectorizer
 model_path = 'best_spam_model_Support Vector Machine.pkl'
@@ -410,7 +413,7 @@ def page1():
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+                flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
                 auth_url, _ = flow.authorization_url(prompt='consent')
     
                 # Inject JavaScript to open the authorization URL automatically

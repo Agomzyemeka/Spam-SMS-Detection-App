@@ -23,7 +23,8 @@ load_dotenv()
 service_account_info = json.loads(json.dumps(dict(st.secrets["gcp_service_account"])))
 credentials = ServiceAccountCredentials.from_service_account_info(service_account_info)
 storage_client = storage.Client(credentials=credentials)
-bucket_name = st.secrets["GCP_BUCKET_NAME"]
+#bucket_name = st.secrets["GCP_BUCKET_NAME"]
+bucket_name = os.getenv("GCP_BUCKET_NAME")
 
 # Paystack API keys from .env file
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")

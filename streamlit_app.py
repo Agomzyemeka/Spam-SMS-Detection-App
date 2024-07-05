@@ -408,9 +408,11 @@ def page1():
         # Get user ID from cookies or create a new one
         if 'user_id' in st.session_state:
             user_id = st.session_state['user_id']
+            st.write("User ID Loaded from cookies:", user_id)
         else:
             user_id = str(uuid.uuid4())
             st.session_state['user_id'] = user_id
+            st.success( User ID: {user_id} created successfully.")
     
         # Check if the token file for the current user exists and load it
         token_info = load_token(user_id)

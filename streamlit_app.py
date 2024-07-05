@@ -440,10 +440,10 @@ def page1():
                 # Inject JavaScript to open the authorization URL automatically
                 components.html(f"""
                     <script>
-                        console.log('Redirecting to: {auth_url}');
-                        window.location.href = "{auth_url}";
+                        window.open("{auth_url}", "_blank");
                     </script>
                 """, height=0)
+
     
                 st.write("Please authorize the application in the newly opened tab.")
     

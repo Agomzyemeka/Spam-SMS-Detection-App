@@ -32,6 +32,11 @@ try:
     st.write("credentials:", credentials)
     storage_client = storage.Client(credentials=credentials)
     st.success("Google Cloud Storage client initialized successfully.")
+        # Debug: List buckets to verify connection
+    buckets = list(storage_client.list_buckets())
+    st.write("Buckets in your project:")
+    for bucket in buckets:
+        st.write(bucket.name)
 except google.auth.exceptions.GoogleAuthError as e:
     st.error(f"Error initializing Google Cloud Storage client: {e}")
 GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")

@@ -426,7 +426,10 @@ def page1():
             else:
                 flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
                 st.write("flow:", flow)
+                st.write("CLIENT_SECRETS_FILE:", CLIENT_SECRETS_FILE)
+                st.write("SCOPES:", SCOPES)
                 auth_url, _ = flow.authorization_url(prompt='consent')
+                st.write("auth_url:", auth_url)
     
                 # Inject JavaScript to open the authorization URL automatically
                 components.html(f"""

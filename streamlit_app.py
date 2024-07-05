@@ -430,10 +430,11 @@ def page1():
                 st.write("SCOPES:", SCOPES)
                 # Extracting the auth_uri value
                 auth_uri = CLIENT_SECRETS_FILE["web"]["auth_uri"]
+                flow.redirect_uri = "https://spam-sms-detection.streamlit.app/"
                 
                 # Displaying the auth_uri value in Streamlit
                 st.write("auth_uri:", auth_uri)
-                auth_url, _ = flow.authorization_url(prompt='consent')
+                auth_url, _ = flow.authorization_url(access_type='offline', prompt='consent', include_granted_scopes='true')
                 st.write("auth_url:", auth_url)
     
                 # Inject JavaScript to open the authorization URL automatically

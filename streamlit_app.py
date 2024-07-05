@@ -65,9 +65,10 @@ redirect_uris = [os.getenv(f"REDIRECT_URI{i}") for i in range(1, 9) if os.getenv
 # OAuth 2.0 client credentials
 # Load client secrets JSON from secrets.toml
 client_secrets_json = st.secrets["client_secrets"]["json"]
-st.write("CLIENT_SECRETS_FILE:", client_secrets_json)
+st.write("CLIENT_SECRETS_FILE(json):", client_secrets_json)
 # Parse JSON string into a Python dictionary
 CLIENT_SECRETS_FILE = json.loads(client_secrets_json)
+st.write("CLIENT_SECRETS_FILE(DIC):", CLIENT_SECRETS_FILE)
 
 # Load the saved model and vectorizer
 model_path = 'best_spam_model_Support Vector Machine.pkl'
@@ -417,7 +418,7 @@ def page1():
         # Check if the token file for the current user exists and load it
         token_info = load_token(user_id)
         if token_info:
-            creds = ServiceAccountCredentials.from_authorized_user_info(token_info, SCOPES)
+            creds = service_account.Credentials.from_authorized_user_info(token_info, SCOPES)
     
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:

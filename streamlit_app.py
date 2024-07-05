@@ -428,6 +428,11 @@ def page1():
                 st.write("flow:", flow)
                 st.write("CLIENT_SECRETS_FILE:", CLIENT_SECRETS_FILE)
                 st.write("SCOPES:", SCOPES)
+                # Extracting the auth_uri value
+                auth_uri = CLIENT_SECRETS_FILE["web"]["auth_uri"]
+                
+                # Displaying the auth_uri value in Streamlit
+                st.write("auth_uri:", auth_uri)
                 auth_url, _ = flow.authorization_url(prompt='consent')
                 st.write("auth_url:", auth_url)
     

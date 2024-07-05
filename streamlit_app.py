@@ -412,7 +412,7 @@ def page1():
         else:
             user_id = str(uuid.uuid4())
             st.session_state['user_id'] = user_id
-            st.success( User ID: {user_id} created successfully.")
+            st.success( f"User ID: {user_id} created successfully.")
     
         # Check if the token file for the current user exists and load it
         token_info = load_token(user_id)

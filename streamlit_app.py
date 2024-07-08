@@ -580,7 +580,7 @@ def page1():
             if creds:
                 try:
                     service = build('gmail', 'v1', credentials=creds)
-                    email_data = pd.DataFrame()
+                    email_data = []
                     page_token = None
                     
                     # Fetch messages in a loop until max_results is reached or no more messages are available

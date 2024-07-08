@@ -431,7 +431,7 @@ def page1():
             else:
                 try:
                     flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
-                    flow.redirect_uri = "https://spam-sms-detection.streamlit.app/page2"
+                    flow.redirect_uri = "https://spam-sms-detection.streamlit.app/"
                     
                     auth_url, _ = flow.authorization_url(access_type='offline', prompt='consent')
                     st.write("auth_url:", auth_url)
@@ -461,12 +461,7 @@ def page1():
                             st.session_state.auth_status = "success"
                             
                             # Inject JavaScript to close the tab and redirect back to the app
-                            components.html(f"""
-                                <script>
-                                    window.opener.location.reload();
-                                    window.close();
-                                </script>
-                            """, height=0)
+
     
                         except google.auth.exceptions.GoogleAuthError as e:
                             st.error(f"Error during authentication: {e}")

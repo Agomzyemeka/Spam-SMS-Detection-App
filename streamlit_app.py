@@ -377,6 +377,10 @@ def page1():
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
+        # Initialize session state
+    if 'auth_status' not in st.session_state:
+        st.session_state.auth_status = None
+
     # Function to save token for a specific user
     def save_token(user_id, token_info):
         try:
@@ -417,48 +421,65 @@ def page1():
     
         # Check if the token file for the current user exists and load it
         token_info = load_token(user_id)
+        creds = None
         if token_info:
-            creds = service_account.Credentials.from_authorized_user_info(token_info, SCOPES)
+            creds = Credentials.from_authorized_user_info(token_info, SCOPES)
     
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
-                st.write("flow:", flow)
-                st.write("CLIENT_SECRETS_FILE:", CLIENT_SECRETS_FILE)
-                st.write("SCOPES:", SCOPES)
-                # Extracting the auth_uri value
-                auth_uri = CLIENT_SECRETS_FILE["web"]["auth_uri"]
-                flow.redirect_uri = "https://spam-sms-detection.streamlit.app/"
-                
-                # Displaying the auth_uri value in Streamlit
-                st.write("auth_uri:", auth_uri)
-                auth_url, _ = flow.authorization_url(access_type='offline', prompt='consent', include_granted_scopes='true')
-                st.write("auth_url:", auth_url)
+                try:
+                    flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
+                    flow.redirect_uri = "https://spam-sms-detection.streamlit.app/"
+                    
+                    auth_url, _ = flow.authorization_url(access_type='offline', prompt='consent', include_granted_scopes='true')
+                    st.write("auth_url:", auth_url)
+        
+                    # Inject JavaScript to open the authorization URL automatically
+                    components.html(f"""
+                        <script>
+                            window.open("{auth_url}", "_blank", "width=500,height=600");
+                        </script>
+                    """, height=0)
+        
+                    st.write("Please authorize the application in the newly opened tab.")
+        
+                    # Capture the authorization response URL automatically
+                    auth_response_url = st.query_params.get('code')
+                    st.write("auth_response_url:", auth_response_url)
+        
+                    if auth_response_url:
+                        try:
+                            flow.fetch_token(code=auth_response_url)
+                            creds = flow.credentials
+                            save_token(user_id, json.loads(creds.to_json()))
     
-                # Inject JavaScript to open the authorization URL automatically
-                components.html(f"""
-                    <script>
-                        window.open("{auth_url}", "_blank");
-                    </script>
-                """, height=0)
-
+                            # Set success message in session state
+                            st.session_state.auth_status = "success"
+                            
+                            # Inject JavaScript to close the tab and redirect back to the app
+                            components.html(f"""
+                                <script>
+                                    window.opener.location.reload();
+                                    window.close();
+                                </script>
+                            """, height=0)
     
-                st.write("Please authorize the application in the newly opened tab.")
-    
-                # Capture the authorization response URL automatically
-                auth_response_url = st.experimental_get_query_params().get('code')
-    
-                if auth_response_url:
-                    try:
-                        flow.fetch_token(code=auth_response_url)
-                        creds = flow.credentials
-                        save_token(json.loads(creds.to_json()), user_id)
-                    except google.auth.exceptions.GoogleAuthError as e:
-                        st.error(f"Error during authentication: {e}")
+                        except google.auth.exceptions.GoogleAuthError as e:
+                            st.error(f"Error during authentication: {e}")
+                            st.session_state.auth_status = "error"
+                except Exception as e:
+                    st.error(f"Error during the authorization flow: {e}")
+                    st.session_state.auth_status = "error"
     
         return creds
+
+    # Display success or error message after reload
+    if st.session_state.auth_status == "success":
+        st.success("Authorization successful! Code received.")
+    elif st.session_state.auth_status == "error":
+        st.error("Authorization failed. Please try again.")
 
     # Paystack Payment Integration
     def initialize_paystack_payment(email, amount, currency):
@@ -558,6 +579,7 @@ def page1():
     def get_emails(folder='inbox', max_results=5):
         creds = authenticate()
         with st.spinner('Authenticating...'):
+        if creds:
             try:
                 service = build('gmail', 'v1', credentials=creds)
                 email_data = []
@@ -594,6 +616,11 @@ def page1():
                     st.write(f'No messages found in {folder.capitalize()}.')
                 else:
                     return pd.DataFrame(email_data)
+
+            except google.auth.exceptions.GoogleAuthError as e:
+                st.error(f"Google Auth Error: {e}")
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
             
             except HttpError as error:
                 st.error(f'An error occurred: {error}')

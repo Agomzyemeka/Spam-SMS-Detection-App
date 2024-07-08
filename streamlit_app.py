@@ -574,6 +574,7 @@ def page1():
         st.session_state['customer_first_name'] = ''
         st.session_state['customer_last_name'] = ''
         st.session_state['customer_phone'] = ''
+        st.session_state['email_data'] = pd.DataFrame()
 
     # Function to fetch emails from Gmail with pagination support
     def get_emails(folder='inbox', max_results=5):

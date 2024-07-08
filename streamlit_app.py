@@ -431,9 +431,9 @@ def page1():
             else:
                 try:
                     flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
-                    flow.redirect_uri = "https://spam-sms-detection.streamlit.app/"
+                    flow.redirect_uri = "https://spam-sms-detection.streamlit.app/page2"
                     
-                    auth_url, _ = flow.authorization_url(access_type='offline', prompt='consent', include_granted_scopes='true')
+                    auth_url, _ = flow.authorization_url(access_type='offline', prompt='consent')
                     st.write("auth_url:", auth_url)
         
                     # Inject JavaScript to open the authorization URL automatically

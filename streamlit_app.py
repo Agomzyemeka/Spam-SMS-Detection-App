@@ -333,7 +333,7 @@ def page1():
 
     # Initialize session state for email data
     if 'email_data' not in st.session_state:
-        st.session_state.email_data = None
+        st.session_state.email_data = pd.DataFrame()
 
     # Single Message Prediction Section
     st.header('Single Message Prediction')

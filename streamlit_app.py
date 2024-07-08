@@ -439,7 +439,9 @@ def page1():
                     # Inject JavaScript to open the authorization URL automatically
                     components.html(f"""
                         <script>
-                            window.open("{auth_url}", "_blank", "width=500,height=600");
+                            window.open("{auth_url}");
+                            window.opener.location.reload();
+                            window.close();                    
                         </script>
                     """, height=0)
         
@@ -618,10 +620,10 @@ def page1():
                     else:
                         return pd.DataFrame(email_data)
     
-                except google.auth.exceptions.GoogleAuthError as e:
-                    st.error(f"Google Auth Error: {e}")
-                except Exception as e:
-                    st.error(f"An unexpected error occurred: {e}")
+                # except google.auth.exceptions.GoogleAuthError as e:
+                 #   st.error(f"Google Auth Error: {e}")
+                # except Exception as e:
+                 #   st.error(f"An unexpected error occurred: {e}")
                 
                 except HttpError as error:
                     st.error(f'An error occurred: {error}')

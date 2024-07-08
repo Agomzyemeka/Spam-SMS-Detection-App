@@ -579,52 +579,52 @@ def page1():
     def get_emails(folder='inbox', max_results=5):
         creds = authenticate()
         with st.spinner('Authenticating...'):
-        if creds:
-            try:
-                service = build('gmail', 'v1', credentials=creds)
-                email_data = []
-                page_token = None
-                
-                # Fetch messages in a loop until max_results is reached or no more messages are available
-                while True:
-                    # Fetch messages with optional page token
-                    results = service.users().messages().list(userId='me', labelIds=[folder.upper()], maxResults=max_results, pageToken=page_token).execute()
-                    messages = results.get('messages', [])
+            if creds:
+                try:
+                    service = build('gmail', 'v1', credentials=creds)
+                    email_data = []
+                    page_token = None
                     
-                    if not messages:
-                        break  # No more messages to fetch
-                    
-                    for message in messages:
-                        msg = service.users().messages().get(userId='me', id=message['id']).execute()
-                        email_data.append({
-                            'message': msg['snippet']
-                        })
+                    # Fetch messages in a loop until max_results is reached or no more messages are available
+                    while True:
+                        # Fetch messages with optional page token
+                        results = service.users().messages().list(userId='me', labelIds=[folder.upper()], maxResults=max_results, pageToken=page_token).execute()
+                        messages = results.get('messages', [])
+                        
+                        if not messages:
+                            break  # No more messages to fetch
+                        
+                        for message in messages:
+                            msg = service.users().messages().get(userId='me', id=message['id']).execute()
+                            email_data.append({
+                                'message': msg['snippet']
+                            })
+                            
+                            if len(email_data) >= max_results:
+                                break  # Stop fetching if max_results is reached
                         
                         if len(email_data) >= max_results:
                             break  # Stop fetching if max_results is reached
+                        
+                        if 'nextPageToken' in results:
+                            page_token = results['nextPageToken']
+                        else:
+                            break  # No more pages to fetch
                     
-                    if len(email_data) >= max_results:
-                        break  # Stop fetching if max_results is reached
-                    
-                    if 'nextPageToken' in results:
-                        page_token = results['nextPageToken']
+                    # Process fetched emails into a DataFrame
+                    if not email_data:
+                        st.write(f'No messages found in {folder.capitalize()}.')
                     else:
-                        break  # No more pages to fetch
+                        return pd.DataFrame(email_data)
+    
+                except google.auth.exceptions.GoogleAuthError as e:
+                    st.error(f"Google Auth Error: {e}")
+                except Exception as e:
+                    st.error(f"An unexpected error occurred: {e}")
                 
-                # Process fetched emails into a DataFrame
-                if not email_data:
-                    st.write(f'No messages found in {folder.capitalize()}.')
-                else:
-                    return pd.DataFrame(email_data)
-
-            except google.auth.exceptions.GoogleAuthError as e:
-                st.error(f"Google Auth Error: {e}")
-            except Exception as e:
-                st.error(f"An unexpected error occurred: {e}")
-            
-            except HttpError as error:
-                st.error(f'An error occurred: {error}')
-                return pd.DataFrame()
+                except HttpError as error:
+                    st.error(f'An error occurred: {error}')
+                    return pd.DataFrame()
 
     # Email Fetch Section
     st.header('Email Fetch')

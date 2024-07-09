@@ -439,9 +439,9 @@ def page1():
                     # Inject JavaScript to open the authorization URL automatically
                     components.html(f"""
                         <script>
-                            window.open("{auth_url}");
-                            window.opener.location.reload();
-                            window.close();                    
+                            window.location.href='{auth_url}'
+                           # window.opener.location.reload();
+                            # window.close();                    
                         </script>
                     """, height=0)
         
@@ -469,14 +469,16 @@ def page1():
                 except Exception as e:
                     st.error(f"Error during the authorization flow: {e}")
                     st.session_state.auth_status = "error"
+
+                     # Display success or error message after reload
+                    if st.session_state.auth_status == "success":
+                        st.success("Authorization successful! Code received.")
+                    elif st.session_state.auth_status == "error":
+                        st.error("Authorization failed. Please try again.")
     
         return creds
 
-    # Display success or error message after reload
-    if st.session_state.auth_status == "success":
-        st.success("Authorization successful! Code received.")
-    elif st.session_state.auth_status == "error":
-        st.error("Authorization failed. Please try again.")
+
 
     # Paystack Payment Integration
     def initialize_paystack_payment(email, amount, currency):

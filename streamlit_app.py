@@ -439,7 +439,7 @@ def page1():
                     # Inject JavaScript to open the authorization URL automatically
                     components.html(f"""
                         <script>
-                            window.location.href='{auth_url}'
+                            window.location.href='{auth_url}';
                            # window.opener.location.reload();
                             # window.close();                    
                         </script>

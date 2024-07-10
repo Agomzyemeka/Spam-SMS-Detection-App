@@ -26,14 +26,14 @@ service_account_info = json.loads(st.secrets["gcp_service_account"]["json"])
 
 try:
     credentials = service_account.Credentials.from_service_account_info(service_account_info)
-    st.write("credentials:", credentials)
+    # Debug:st.write("credentials:", credentials)
     storage_client = storage.Client(credentials=credentials)
     st.success("Google Cloud Storage client initialized successfully.")
         # Debug: List buckets to verify connection
     buckets = list(storage_client.list_buckets())
-    st.write("Buckets in your project:")
-    for bucket in buckets:
-        st.write(bucket.name)
+    # Debug:st.write("Buckets in your project:")
+   # Debug: for bucket in buckets:
+        # Debug:st.write(bucket.name)
 except google.auth.exceptions.GoogleAuthError as e:
     st.error(f"Error initializing Google Cloud Storage client: {e}")
 GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
@@ -49,7 +49,7 @@ PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
 # OAuth 2.0 client credentials
 # Load client secrets JSON from secrets.toml
 client_secrets_json = st.secrets["client_secrets"]["json"]
-st.write("CLIENT_SECRETS_FILE(json):", client_secrets_json)
+# Debug:st.write("CLIENT_SECRETS_FILE(json):", client_secrets_json)
 # Parse JSON string into a Python dictionary
 CLIENT_SECRETS_FILE = json.loads(client_secrets_json)
 # Debug:st.write("CLIENT_SECRETS_FILE(DIC):", CLIENT_SECRETS_FILE)

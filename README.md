@@ -23,10 +23,6 @@ You can use the app to predict spam SMS by either entering a single message, upl
 1. Upload a CSV file containing a column named 'message' with the messages you want to classify.
 2. The app will display the predictions and provide an option to download the results as a CSV file.
 
-### Email Integration
-1. Authenticate using your Google account.
-2. Click 'Fetch Emails' to retrieve the latest 10 emails from your inbox.
-3. The app will display the emails, and you can classify them for spam.
 
 You can access the app using this link: [Spam SMS Detection App](https://).
 

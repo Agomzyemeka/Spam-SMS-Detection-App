@@ -21,11 +21,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize Google Cloud Storage client using credentials from Streamlit secrets
-#service_account_info = json.loads(json.dumps(dict(st.secrets["gcp_service_account"])))
 service_account_info = json.loads(st.secrets["gcp_service_account"]["json"])
-st.write("service_account_info:", st.secrets["gcp_service_account"]["json"])
-# Debug: Print the service_account_info to ensure it is correctly parsed
-#st.write("Service Account Info:", service_account_info)
+# Debug:st.write("service_account_info:", st.secrets["gcp_service_account"]["json"])
 
 try:
     credentials = service_account.Credentials.from_service_account_info(service_account_info)
@@ -41,25 +38,12 @@ except google.auth.exceptions.GoogleAuthError as e:
     st.error(f"Error initializing Google Cloud Storage client: {e}")
 GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
 # Debug: Print the bucket name to ensure it is correctly loaded
-st.write("GCS_BUCKET_NAME:", GCS_BUCKET_NAME)
+# Debug:st.write("GCS_BUCKET_NAME:", GCS_BUCKET_NAME)
 
 # Paystack API keys from .env file
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY")
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY")
-st.write("PAYSTACK_PUBLIC_KEY:", PAYSTACK_PUBLIC_KEY)
-#print(f"PAYSTACK_SECRET_KEY: {PAYSTACK_SECRET_KEY}")
-# Use PAYSTACK_SECRET_KEY in your application logic
-# Example: Make an API call using the secret key
-
-# Access the environment variables
-client_id = os.getenv("CLIENT_ID")
-project_id = os.getenv("PROJECT_ID")
-#st.write("PROJECT_ID:", st.secrets["client_secrets"]["json"]["project_id"])
-auth_uri = os.getenv("AUTH_URI")
-token_uri = os.getenv("TOKEN_URI")
-auth_provider_x509_cert_url = os.getenv("AUTH_PROVIDER_X509_CERT_URL")
-client_secret = os.getenv("CLIENT_SECRET")
-redirect_uris = [os.getenv(f"REDIRECT_URI{i}") for i in range(1, 9) if os.getenv(f"REDIRECT_URI{i}")]
+# Debug:st.write("PAYSTACK_PUBLIC_KEY:", PAYSTACK_PUBLIC_KEY)
 
 
 # OAuth 2.0 client credentials
@@ -68,7 +52,7 @@ client_secrets_json = st.secrets["client_secrets"]["json"]
 st.write("CLIENT_SECRETS_FILE(json):", client_secrets_json)
 # Parse JSON string into a Python dictionary
 CLIENT_SECRETS_FILE = json.loads(client_secrets_json)
-st.write("CLIENT_SECRETS_FILE(DIC):", CLIENT_SECRETS_FILE)
+# Debug:st.write("CLIENT_SECRETS_FILE(DIC):", CLIENT_SECRETS_FILE)
 
 # Load the saved model and vectorizer
 model_path = 'best_spam_model_Support Vector Machine.pkl'
@@ -328,7 +312,6 @@ st.markdown(
 # Streamlit UI
 #st.title('Spam SMS Detection App')
 
-
 def page1():
 
     # Initialize session state for email data
@@ -344,9 +327,9 @@ def page1():
             if single_message:
                 single_prediction = model.predict(vectorizer.transform([single_message]))
                 if single_prediction[0] == 1:
-                    st.write('The message is Spam.')
+                    st.error(f"The message is Spam.")
                 else:
-                    st.write('The message is Not Spam.')
+                    st.success(f"The message is Not Spam.")
             else:
                 st.error('Please enter a message.')
 
@@ -405,80 +388,6 @@ def page1():
             st.error(f"Error loading token for user {user_id}: {e}")
             return None
     
-    # Function to authenticate and get Gmail service
-    def authenticate():
-        SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-        creds = None
-    
-        # Get user ID from cookies or create a new one
-        if 'user_id' in st.session_state:
-            user_id = st.session_state['user_id']
-            st.write("User ID Loaded from cookies:", user_id)
-        else:
-            user_id = str(uuid.uuid4())
-            st.session_state['user_id'] = user_id
-            st.success( f"User ID: {user_id} created successfully.")
-    
-        # Check if the token file for the current user exists and load it
-        token_info = load_token(user_id)
-        creds = None
-        if token_info:
-            creds = Credentials.from_authorized_user_info(token_info, SCOPES)
-    
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                try:
-                    flow = InstalledAppFlow.from_client_config(CLIENT_SECRETS_FILE, SCOPES)
-                    flow.redirect_uri = "https://spam-sms-detection.streamlit.app/"
-                    
-                    auth_url, _ = flow.authorization_url(access_type='offline', prompt='consent')
-                    st.write("auth_url:", auth_url)
-        
-                    # Inject JavaScript to open the authorization URL automatically
-                    components.html(f"""
-                        <script>
-                            window.location.href='{auth_url}';
-                           # window.opener.location.reload();
-                            # window.close();                    
-                        </script>
-                    """, height=0)
-        
-                    st.write("Please authorize the application in the newly opened tab.")
-        
-                    # Capture the authorization response URL automatically
-                    auth_response_url = st.query_params.get('code')
-                    st.write("auth_response_url:", auth_response_url)
-        
-                    if auth_response_url:
-                        try:
-                            flow.fetch_token(code=auth_response_url)
-                            creds = flow.credentials
-                            save_token(user_id, json.loads(creds.to_json()))
-    
-                            # Set success message in session state
-                            st.session_state.auth_status = "success"
-                            
-                            # Inject JavaScript to close the tab and redirect back to the app
-
-    
-                        except google.auth.exceptions.GoogleAuthError as e:
-                            st.error(f"Error during authentication: {e}")
-                            st.session_state.auth_status = "error"
-                except Exception as e:
-                    st.error(f"Error during the authorization flow: {e}")
-                    st.session_state.auth_status = "error"
-
-                     # Display success or error message after reload
-                    if st.session_state.auth_status == "success":
-                        st.success("Authorization successful! Code received.")
-                    elif st.session_state.auth_status == "error":
-                        st.error("Authorization failed. Please try again.")
-    
-        return creds
-
-
 
     # Paystack Payment Integration
     def initialize_paystack_payment(email, amount, currency):
@@ -575,106 +484,6 @@ def page1():
         st.session_state['customer_phone'] = ''
         st.session_state['email_data'] = pd.DataFrame()
 
-    # Function to fetch emails from Gmail with pagination support
-    def get_emails(folder='inbox', max_results=5):
-        creds = authenticate()
-        with st.spinner('Authenticating...'):
-            if creds:
-                try:
-                    service = build('gmail', 'v1', credentials=creds)
-                    email_data = []
-                    page_token = None
-                    
-                    # Fetch messages in a loop until max_results is reached or no more messages are available
-                    while True:
-                        # Fetch messages with optional page token
-                        results = service.users().messages().list(userId='me', labelIds=[folder.upper()], maxResults=max_results, pageToken=page_token).execute()
-                        messages = results.get('messages', [])
-                        
-                        if not messages:
-                            break  # No more messages to fetch
-                        
-                        for message in messages:
-                            msg = service.users().messages().get(userId='me', id=message['id']).execute()
-                            email_data.append({
-                                'message': msg['snippet']
-                            })
-                            
-                            if len(email_data) >= max_results:
-                                break  # Stop fetching if max_results is reached
-                        
-                        if len(email_data) >= max_results:
-                            break  # Stop fetching if max_results is reached
-                        
-                        if 'nextPageToken' in results:
-                            page_token = results['nextPageToken']
-                        else:
-                            break  # No more pages to fetch
-                    
-                    # Process fetched emails into a DataFrame
-                    if not email_data:
-                        st.write(f'No messages found in {folder.capitalize()}.')
-                    else:
-                        return pd.DataFrame(email_data)
-    
-                # except google.auth.exceptions.GoogleAuthError as e:
-                 #   st.error(f"Google Auth Error: {e}")
-                # except Exception as e:
-                 #   st.error(f"An unexpected error occurred: {e}")
-                
-                except HttpError as error:
-                    st.error(f'An error occurred: {error}')
-                    return pd.DataFrame()
-
-    # Email Fetch Section
-    st.header('Email Fetch')
-    st.markdown('<p class="instructions">Select a Gmail folder and fetch the latest emails for spam detection. You can download the fetched emails as a CSV file and use it for batch prediction.You can only fetch 10 emails for free, Payment is required for more emails</p>', unsafe_allow_html=True)
-
-    # Select Gmail folder and fetch emails
-    selected_folder = st.selectbox('Select Gmail Folder', ['INBOX', 'SPAM', 'SENT', 'CATEGORY_SOCIAL', 'CATEGORY_PROMOTIONS'])
-    max_emails = st.number_input('Enter the number of emails to fetch', min_value=1, max_value=10, value=10, step=1)
-    if max_emails > 10:
-        st.write('A charge of $10 will apply for you to run spam detection on more emails.')
-
-    if st.button('Fetch Emails'):
-        if max_emails > 10:
-            st.error('Please proceed with payment below for additional emails.')
-        else:
-            with st.spinner('Fetching emails...'):
-                st.session_state.email_data = get_emails(folder=selected_folder.lower(), max_results=max_emails)
-                if not st.session_state.email_data.empty:
-                    st.write(st.session_state.email_data)
-                    st.download_button(
-                        label="Download Emails as CSV",
-                        data=st.session_state.email_data.to_csv(index=False).encode('utf-8'),
-                        file_name='email_data.csv',
-                        mime='text/csv',
-                        help='You can use the downloaded CSV to test or run the batch prediction.',
-                    )
-                    st.markdown('<p class="instructions">You can use the downloaded CSV file to test or run the batch prediction.</p>', unsafe_allow_html=True)
-
-
-    if st.session_state.email_data is not None:
-        st.markdown("---")
-        if st.button('Predict Fetched Emails'):
-            with st.spinner('Processing...'):
-                try:
-                    email_vectors = vectorizer.transform(st.session_state.email_data['message'])
-                    email_predictions = model.predict(email_vectors)
-                    st.session_state.email_data['Prediction'] = ['Spam' if pred == 1 else 'Not Spam' for pred in email_predictions]
-                    st.write(st.session_state.email_data)
-                    st.download_button(
-                        label="Download Predictions",
-                        data=st.session_state.email_data.to_csv(index=False).encode('utf-8'),
-                        file_name='email_predictions.csv',
-                        mime='text/csv',
-                    )
-                except Exception as e:
-                    st.error(f'Error during prediction: {e}')
-                    st.write("Debug info:")
-                    st.write(st.session_state.email_data.head())
-    else:
-        st.write("No emails to display.")
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 

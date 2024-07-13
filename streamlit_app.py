@@ -28,7 +28,7 @@ try:
     credentials = service_account.Credentials.from_service_account_info(service_account_info)
     # Debug:st.write("credentials:", credentials)
     storage_client = storage.Client(credentials=credentials)
-    st.success("Google Cloud Storage client initialized successfully.")
+     # Debug:st.success("Google Cloud Storage client initialized successfully.")
         # Debug: List buckets to verify connection
     buckets = list(storage_client.list_buckets())
     # Debug:st.write("Buckets in your project:")
@@ -358,7 +358,7 @@ def page1():
             else:
                 st.error("The uploaded file does not contain a 'message' column.")
 
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+  
 
         # Initialize session state
     if 'auth_status' not in st.session_state:
